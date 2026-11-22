@@ -1,15 +1,15 @@
 [
  {
-  "key": "hero",
-  "title": "File:Aerial panorama of West Lake and its surrounding mountains. December 2023.jpg",
+  "key": "base",
+  "title": "高德地图卫星影像（Amap World Imagery）拼接",
   "size": [
-   1600,
-   648
+   2786,
+   1567
   ],
-  "bytes": 144155,
-  "lic": "CC BY 4.0",
-  "artist": "Wanderingchina",
-  "page": "https://commons.wikimedia.org/wiki/File:Aerial_panorama_of_West_Lake_and_its_surrounding_mountains._December_2023.jpg"
+  "lic": "© 高德地图，仅作课程作业演示",
+  "artist": "Amap / AutoNavi",
+  "page": "https://www.amap.com/",
+  "note": "Zoom 16 瓦片拼接；景点坐标 WGS84 经 GCJ-02 换算后落点"
  },
  {
   "key": "sudi",
