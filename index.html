@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>西湖十景 · 一湖烟雨</title>
+<!--
+  西湖十景 · 实景版
+  ------------------------------------------------------
+  整页一屏，不滚动；背景是西湖航拍实景，十景用朱红印记标在图上；
+  点印记弹出实景照片 + 文案。
+  照片来自 Wikimedia Commons，授权见页脚与 credits.json
+-->
+<style>
+:root{
+  --ink:#16202a;
+  --ink-2:#3d4b55;
+  --paper:#f7f3e9;
+  --cinnabar:#a6332b;
+  --gold:#b08d57;
+  --kai:"STKaiti","Kaiti SC","KaiTi","楷体",serif;
+  --song:"Songti SC","SimSun","宋体",serif;
+  --sans:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
+body{
+  font-family:var(--song);color:#e9e3d5;background:#0b1013;
+  overflow:hidden;                 /* 一屏，不滚动，也不许横向溢出 */
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ===== 骨架：标题条 / 实景主图 / 十景图墙 / 页脚 ===== */
+.app{
+  height:100vh;height:100dvh;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto auto;
+  padding:clamp(10px,1.6vh,18px) clamp(14px,2vw,30px) 0;
+  gap:clamp(8px,1.2vh,13px);
+}
+
+/* ===== 顶部标题条 ===== */
+.bar{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;}
+.brand{display:flex;align-items:center;gap:13px;}
+.seal{
+  width:clamp(38px,4.2vh,50px);height:clamp(38px,4.2vh,50px);
+  flex:none;display:grid;place-items:center;
+  border:1.5px solid rgba(200,90,74,.85);border-radius:3px;
+  color:#e9a79b;font-family:var(--kai);font-size:clamp(11px,1.5vh,14px);
+  line-height:1.05;letter-spacing:1px;text-align:center;
+  box-shadow:0 0 0 3px rgba(166,51,43,.12) inset;
+}
+.bar h1{
+  margin:0;font-family:var(--kai);font-weight:700;
+  font-size:clamp(20px,2.8vh,31px);letter-spacing:clamp(3px,.7vh,8px);
+  color:#f3eee2;text-shadow:0 2px 18px rgba(0,0,0,.6);
+}
+.bar .sub{
+  margin:5px 0 0;font-family:var(--sans);
+  font-size:clamp(9px,1.1vh,11px);letter-spacing:2.4px;
+  color:rgba(224,214,196,.6);text-transform:uppercase;
+}
+.hint{
+  font-family:var(--sans);font-size:clamp(10px,1.22vh,12px);
+  color:rgba(230,220,200,.68);letter-spacing:.5px;text-align:right;line-height:1.75;margin:0;
+}
+.hint b{color:#e3b3a8;font-weight:500;}
+
+/* ===== 实景主图 ===== */
+.stage{
+  position:relative;min-height:0;border-radius:3px;overflow:hidden;background:#141b1f;
+  box-shadow:0 26px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.07);
+}
+.stage img.shot{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  filter:saturate(.96) contrast(1.05) brightness(.94);
+  animation:drift 40s ease-in-out infinite alternate;
+}
+@keyframes drift{from{transform:scale(1.02)}to{transform:scale(1.07) translate3d(-.7%,-.9%,0)}}
+.veil{
+  position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(125% 95% at 50% 45%, rgba(8,12,14,0) 40%, rgba(8,12,14,.45) 100%),
+    linear-gradient(180deg, rgba(8,12,14,.45) 0%, rgba(8,12,14,0) 26%, rgba(8,12,14,0) 68%, rgba(8,12,14,.62) 100%);
+}
+.stage-foot{
+  position:absolute;left:15px;bottom:12px;display:flex;gap:12px;align-items:center;
+  font-family:var(--sans);font-size:clamp(9px,1.1vh,11px);
+  color:rgba(232,224,206,.78);letter-spacing:.7px;pointer-events:none;
+}
+.stage-foot i{display:inline-block;width:16px;height:1px;background:rgba(232,224,206,.45);}
+.stage-mark{
+  position:absolute;right:15px;bottom:12px;pointer-events:none;
+  font-family:var(--kai);font-size:clamp(10px,1.3vh,13px);letter-spacing:3px;
+  color:rgba(240,232,214,.72);text-shadow:0 2px 12px rgba(0,0,0,.7);
+}
+
+/* ===== 十景图墙 ===== */
+.wall{
+  display:grid;grid-template-columns:repeat(10,minmax(0,1fr));
+  gap:clamp(6px,.75vw,12px);margin:0;padding:0;list-style:none;min-height:0;
+  height:clamp(80px,12.6vh,132px);      /* 固定高度，任何屏幕都不塌陷 */
+}
+.wall button{
+  width:100%;height:100%;padding:0;border:0;background:none;cursor:pointer;
+  display:flex;flex-direction:column;gap:clamp(4px,.7vh,7px);
+  font-family:inherit;color:inherit;text-align:center;
+}
+.wall .ph{
+  position:relative;flex:1 1 auto;min-height:0;overflow:hidden;border-radius:2px;
+  background:#1a2226;box-shadow:0 0 0 1px rgba(255,255,255,.09), 0 8px 20px rgba(0,0,0,.45);
+  transition:box-shadow .28s ease, transform .28s ease;
+}
+.wall .ph img{
+  width:100%;height:100%;object-fit:cover;display:block;
+  filter:saturate(.9) brightness(.86);transition:transform .5s cubic-bezier(.2,.8,.3,1), filter .3s;
+}
+.wall .ph::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(10,14,16,.05),rgba(10,14,16,.5));
+  transition:opacity .28s;pointer-events:none;
+}
+.wall .no{
+  position:absolute;top:5px;left:6px;z-index:2;
+  font-family:var(--sans);font-size:clamp(8px,1vh,10px);letter-spacing:1px;
+  color:rgba(255,255,255,.9);text-shadow:0 1px 6px rgba(0,0,0,.9);
+}
+.wall .name{
+  flex:none;font-family:var(--kai);font-size:clamp(10px,1.3vh,13px);
+  letter-spacing:1.5px;color:rgba(236,227,209,.78);
+  transition:color .22s;
+}
+.wall button:hover .ph,.wall button:focus-visible .ph{
+  transform:translateY(-3px);
+  box-shadow:0 0 0 1.5px rgba(196,102,88,.95), 0 14px 28px rgba(0,0,0,.6);
+}
+.wall button:hover .ph img,.wall button:focus-visible .ph img{transform:scale(1.07);filter:saturate(1.02) brightness(1);}
+.wall button:hover .name,.wall button:focus-visible .name{color:#f7f1e2;}
+.wall button:focus-visible{outline:none;}
+
+/* ===== 页脚 ===== */
+.foot{
+  padding:clamp(5px,.8vh,9px) 0 clamp(7px,1.1vh,11px);
+  font-family:var(--sans);font-size:clamp(8.5px,1.02vh,10.5px);
+  color:rgba(210,200,182,.42);letter-spacing:.4px;text-align:center;line-height:1.5;
+}
+
+/* ===== 弹窗：卷轴卡片 ===== */
+.modal{
+  position:fixed;inset:0;z-index:60;display:none;place-items:center;
+  padding:clamp(10px,2vh,26px);
+  background:radial-gradient(circle at 50% 40%,rgba(12,16,18,.74),rgba(6,9,11,.93));
+  backdrop-filter:blur(7px) saturate(.9);
+}
+.modal.on{display:grid;animation:fade .28s ease;}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.card{
+  width:min(1180px,100%);max-height:calc(100dvh - 2*clamp(10px,2vh,26px));
+  height:min(680px, calc(100dvh - 2*clamp(10px,2vh,26px)));   /* 固定高度，翻页不跳动 */
+  display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,1fr);
+  background:var(--paper);border-radius:3px;overflow:hidden;
+  box-shadow:0 40px 90px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.1);
+  animation:rise .34s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+.card .photo{position:relative;min-height:0;margin:0;background:#1a2226;overflow:hidden;}
+.card .photo img{width:100%;height:100%;object-fit:cover;display:block;}
+.card .photo figcaption{
+  position:absolute;left:0;right:0;bottom:0;padding:26px 16px 11px;
+  background:linear-gradient(180deg,transparent,rgba(8,12,14,.8));
+  font-family:var(--sans);font-size:clamp(9px,1.08vh,11px);color:rgba(240,234,222,.8);
+  letter-spacing:.3px;line-height:1.5;
+}
+.card .text{
+  padding:clamp(16px,2.5vh,28px) clamp(16px,1.9vw,30px);
+  display:flex;flex-direction:column;min-height:0;overflow:auto;color:var(--ink);
+  background:linear-gradient(180deg,#f8f4ea,#f2eddf);
+}
+.card .no{
+  font-family:var(--sans);font-size:clamp(9px,1.08vh,11px);letter-spacing:3px;
+  color:var(--gold);margin:0 0 6px;
+}
+.card h2{
+  margin:0;font-family:var(--kai);font-weight:700;
+  font-size:clamp(21px,3.1vh,33px);letter-spacing:3px;color:#1d2a33;
+}
+.card .en{
+  margin:6px 0 0;font-family:var(--sans);font-size:clamp(9px,1.08vh,11px);
+  letter-spacing:1.8px;text-transform:uppercase;color:#9aa6ac;
+}
+.rule{height:1px;background:linear-gradient(90deg,rgba(166,51,43,.7),rgba(176,141,87,.25),transparent);
+  margin:clamp(9px,1.5vh,15px) 0;}
+.card .desc{
+  margin:0;font-size:clamp(12px,1.58vh,15px);line-height:1.95;color:var(--ink-2);
+  text-align:justify;
+}
+.card .poem{
+  margin:clamp(9px,1.5vh,15px) 0 0;padding:clamp(8px,1.3vh,13px) clamp(10px,1.1vw,15px);
+  border-left:2px solid rgba(166,51,43,.55);background:rgba(255,255,255,.55);
+  font-family:var(--kai);font-size:clamp(11.5px,1.46vh,14px);line-height:1.85;color:#4a3f33;
+}
+.card .poem span{display:block;font-family:var(--sans);font-size:.72em;letter-spacing:1px;
+  color:#9b8a72;margin-top:4px;}
+.card .nav{
+  margin-top:auto;padding-top:clamp(11px,1.7vh,17px);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border-top:1px solid rgba(176,141,87,.28);
+}
+.card .nav button{
+  font-family:var(--kai);font-size:clamp(11px,1.36vh,13px);letter-spacing:1px;
+  color:#4a3f33;background:none;border:1px solid rgba(176,141,87,.45);border-radius:2px;
+  padding:6px 14px;cursor:pointer;transition:.2s;
+}
+.card .nav button:hover{background:var(--cinnabar);border-color:var(--cinnabar);color:#fff8f2;}
+.card .nav .count{font-family:var(--sans);font-size:11px;letter-spacing:2px;color:#a99b84;}
+.close{
+  position:absolute;top:clamp(10px,2vh,22px);right:clamp(10px,2vh,22px);z-index:70;
+  width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.28);
+  background:rgba(16,22,26,.5);color:#f0e9dc;font-size:18px;line-height:1;
+  cursor:pointer;transition:.2s;display:grid;place-items:center;
+}
+.close:hover{background:var(--cinnabar);border-color:var(--cinnabar);transform:rotate(90deg);}
+
+/* ===== 窄屏 / 矮屏兜底 ===== */
+@media (max-width:1100px){
+  .wall{grid-template-columns:repeat(5,minmax(0,1fr));height:clamp(150px,26vh,260px);}
+  .wall .name{font-size:10.5px;letter-spacing:.5px;}
+}
+@media (max-width:760px){
+  .card{grid-template-columns:1fr;max-height:calc(100dvh - 24px);}
+  .card .photo{aspect-ratio:16/10;}
+  .hint{display:none;}
+  .wall{grid-template-columns:repeat(5,minmax(0,1fr));}
+}
+@media (max-height:600px){
+  .bar .sub{display:none;}
+  .hint{display:none;}
+  .wall .name{font-size:10px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <div class="seal">西湖<br>十景</div>
+      <div>
+        <h1>一 湖 烟 雨</h1>
+        <p class="sub">Ten Scenes of West Lake &middot; Hangzhou</p>
+      </div>
+    </div>
+    <p class="hint">下方十张皆是<b>实景摄影</b>，点开看大图与故事<br>也可按 <b>&larr;</b> <b>&rarr;</b> 逐景浏览，<b>Esc</b> 收起</p>
+  </header>
+
+  <section class="stage" id="stage">
+    <img class="shot" src="img/hero.jpg" alt="西湖全景航拍实景">
+    <div class="veil"></div>
+    <div class="stage-foot">
+      <span>西湖 &middot; 三面云山一面城</span><i></i><span>水面 6.38 平方公里 &middot; 2011 年列入世界文化遗产</span>
+    </div>
+    <div class="stage-mark">实 景 摄 影</div>
+  </section>
+
+  <ul class="wall" id="wall" aria-label="西湖十景"></ul>
+
+  <footer class="foot">
+    十景照片来自 Wikimedia Commons（CC BY / CC BY-SA / CC0 授权），作者与许可详见 credits.json &middot; 本页仅用于课程作业演示
+  </footer>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <button class="close" id="mClose" aria-label="关闭">&#10005;</button>
+  <div class="card">
+    <figure class="photo" style="margin:0">
+      <img id="mImg" alt="">
+      <figcaption id="mCredit"></figcaption>
+    </figure>
+    <div class="text">
+      <p class="no" id="mNo"></p>
+      <h2 id="mTitle"></h2>
+      <p class="en" id="mEn"></p>
+      <div class="rule"></div>
+      <p class="desc" id="mDesc"></p>
+      <p class="poem" id="mPoem"></p>
+      <div class="nav">
+        <button id="mPrev">&larr; 上一景</button>
+        <span class="count" id="mCount"></span>
+        <button id="mNext">下一景 &rarr;</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+/* ============ 十景数据 ============ */
+const SCENES = [
+  {
+    key:"sudi", no:"一", name:"苏堤春晓", en:"Su Causeway in Spring", cls:"",
+    desc:"苏堤全长 2797 米，北宋元祐五年（1090）苏轼任杭州知州时疏浚西湖，用挖出的葑泥筑成这条纵贯南北的长堤。堤上自北而南六桥相连：跨虹、东浦、压堤、望山、锁澜、映波。春来桃柳夹岸，六桥烟柳，是十景之首。",
+    note:"春日清晨雾未散时，从跨虹桥西望压堤桥，柳色最浓。",
+    src:"看点", credit:"摄影 钉钉 · CC BY-SA 4.0"
+  },
+  {
+    key:"quyuan", no:"二", name:"曲院风荷", en:"Lotus in the Breeze", cls:"",
+    desc:"南宋时这里是官办酿酒作坊「麴院」，取金沙涧水制曲酿酒，近岸遍植荷花，夏日荷香与酒香同至。清康熙帝题额时改「麴」为「曲」，遂名曲院风荷。今园内辟五处荷池，荷花品种逾百。",
+    note:"接天莲叶无穷碧，映日荷花别样红。",
+    src:"宋 · 杨万里《晓出净慈寺送林子方》", credit:"摄影 钉钉 · CC BY-SA 4.0"
+  },
+  {
+    key:"pinghu", no:"三", name:"平湖秋月", en:"Autumn Moon over the Calm Lake", cls:"",
+    desc:"在白堤西端、孤山东南麓。唐代此处已建望湖亭，清康熙三十八年（1699）题额「平湖秋月」。一方平台伸入湖面，秋夜月升时湖天一碧，是西湖赏月第一处。",
+    note:"万顷湖平长似镜，四时月好最宜秋。",
+    src:"清 · 平湖秋月亭联", credit:"摄影 Jeff chenqinyi · CC BY-SA 3.0"
+  },
+  {
+    key:"duanqiao", no:"四", name:"断桥残雪", en:"Lingering Snow on Broken Bridge", cls:"",
+    desc:"白堤东端起点的第一桥，唐代称「段家桥」，谐音传为「断桥」。冬雪初霁，桥面阳处积雪先融、阴处犹白，远望似断非断，故得此名。《白蛇传》里许仙与白娘子在此借伞定情。",
+    note:"晴湖不如雨湖，雨湖不如月湖，月湖不如雪湖。",
+    src:"明 · 汪珂玉《西子湖拾翠余谈》", credit:"摄影 Suicasmo · CC0"
+  },
+  {
+    key:"liulang", no:"五", name:"柳浪闻莺", en:"Orioles Singing in the Willows", cls:"",
+    desc:"西湖东南岸，南宋时为御园「聚景园」，沿湖植柳如浪。今园分友谊、闻莺、聚景、南园四区，春日柳丝拂水、黄莺啼鸣，「柳浪」「闻莺」二字都落在眼前。",
+    note:"柳阴深霭玉壶清，碧浪摇空舞袖轻。",
+    src:"明 · 万达甫《柳浪闻莺》", credit:"摄影 Shujianyang · CC BY-SA 4.0"
+  },
+  {
+    key:"huagang", no:"六", name:"花港观鱼", en:"Viewing Fish at Flower Pond", cls:"",
+    desc:"在苏堤南端西侧。南宋内侍卢允升在此筑「卢园」，引花家山溪水入园成池养鱼。清康熙题「花港观鱼」，乾隆题诗。今红鱼池放养红鲫数千尾，投饵即群聚翻涌。",
+    note:"花家山下流花港，花著鱼身鱼嘬花。",
+    src:"清 · 乾隆《花港观鱼》", credit:"摄影 Panoramio 用户 · CC BY 3.0"
+  },
+  {
+    key:"santan", no:"七", name:"三潭印月", en:"Three Pools Mirroring the Moon", cls:"",
+    desc:"湖中小瀛洲，明万历三十五年（1607）钱塘县令聂心汤以疏浚湖泥堆筑成岛，岛中有湖，呈「田」字格局。岛南三座石塔高约 2 米，塔身中空、球面五孔，承苏轼元祐年间立塔标界之水界遗制。中秋夜塔内点烛，水面映出月影十余。",
+    note:"塔孔透光映水，一月化作多轮，是「印月」二字的由来。",
+    src:"看点", credit:"摄影 猫猫的日记本 · CC BY-SA 4.0"
+  },
+  {
+    key:"leifeng", no:"八", name:"雷峰夕照", en:"Leifeng Pagoda in the Sunset", cls:"",
+    desc:"吴越国王钱俶为黄妃建塔，北宋太平兴国二年（977）落成，八角五层。1924 年 9 月 25 日旧塔倒塌，鲁迅曾两度撰文；2002 年在遗址之上重建。夕阳西下时塔影横斜于湖，一湖皆赤。",
+    note:"湖上两浮屠，雷峰如老衲，宝石如美人。",
+    src:"明 · 李流芳《西湖卧游图题跋》", credit:"摄影 HoweyYuan · CC BY-SA 4.0"
+  },
+  {
+    key:"nanping", no:"九", name:"南屏晚钟", en:"Evening Bell at Nanping Hill", cls:"",
+    desc:"南屏山北麓净慈寺，后周显德元年（954）创建，南宋时位列「五山」之一。明洪武十一年（1378）铸大铜钟，钟声撞上南屏山多孔的石灰岩崖壁，回响不绝，暮色里传遍半个西湖。",
+    note:"钟声撞上山壁便折回来，所以比别处的钟都传得远。",
+    src:"看点", credit:"摄影 xiquinhosilva · CC BY 2.0"
+  },
+  {
+    key:"shuangfeng", no:"十", name:"双峰插云", en:"Twin Peaks Piercing the Clouds", cls:"",
+    desc:"南高峰（257 米）与北高峰（314 米）隔湖对峙。宋时两峰顶上各有一座塔，阴雨云雾低垂，塔尖浮在云上，远望如自云中插出。今塔已不存，云景依旧，观景处在洪春桥畔。",
+    note:"雨后初晴，或春雾未开时，最容易看见「插云」。",
+    src:"看点", credit:"摄影 Panoramio 用户 · CC BY 3.0"
+  }
+];
+
+/* ============ 十景图墙 ============ */
+const wall = document.getElementById("wall");
+wall.innerHTML = SCENES.map((s, i) => `
+  <li>
+    <button type="button" data-i="${i}" aria-label="查看 ${s.name} 实景">
+      <span class="ph">
+        <span class="no">${s.no}</span>
+        <img src="img/t/${s.key}.jpg" alt="${s.name} 实景照片" loading="eager" decoding="async">
+      </span>
+      <span class="name">${s.name}</span>
+    </button>
+  </li>`).join("");
+
+/* ============ 弹窗 ============ */
+const modal = document.getElementById("modal");
+const mImg = document.getElementById("mImg");
+const mNo = document.getElementById("mNo");
+const mTitle = document.getElementById("mTitle");
+const mEn = document.getElementById("mEn");
+const mDesc = document.getElementById("mDesc");
+const mPoem = document.getElementById("mPoem");
+const mCredit = document.getElementById("mCredit");
+const mCount = document.getElementById("mCount");
+let cur = 0, lastFocus = null;
+
+function show(i) {
+  cur = (i + SCENES.length) % SCENES.length;
+  const s = SCENES[cur];
+  mImg.src = "img/" + s.key + ".jpg";
+  mImg.alt = s.name + " 实景照片";
+  mNo.textContent = "第 " + s.no + " 景";
+  mTitle.textContent = s.name;
+  mEn.textContent = s.en;
+  mDesc.textContent = s.desc;
+  mPoem.innerHTML = s.note + "<span>" + s.src + "</span>";
+  mCredit.textContent = s.credit + " · Wikimedia Commons";
+  mCount.textContent = (cur + 1) + " / " + SCENES.length;
+  modal.classList.add("on");
+  document.body.style.overflow = "hidden";
+  document.getElementById("mClose").focus({preventScroll: true});
+}
+
+function hide() {
+  modal.classList.remove("on");
+  document.body.style.overflow = "";
+  if (lastFocus) lastFocus.focus({preventScroll: true});
+}
+
+wall.addEventListener("click", e => {
+  const btn = e.target.closest("button[data-i]");
+  if (!btn) return;
+  lastFocus = btn;
+  show(+btn.dataset.i);
+});
+document.getElementById("mClose").addEventListener("click", hide);
+document.getElementById("mPrev").addEventListener("click", () => show(cur - 1));
+document.getElementById("mNext").addEventListener("click", () => show(cur + 1));
+modal.addEventListener("click", e => { if (e.target === modal) hide(); });
+
+document.addEventListener("keydown", e => {
+  const open = modal.classList.contains("on");
+  if (e.key === "Escape" && open) { hide(); return; }
+  if (e.key === "ArrowRight") { e.preventDefault(); open ? show(cur + 1) : show(0); }
+  if (e.key === "ArrowLeft")  { e.preventDefault(); open ? show(cur - 1) : show(0); }
+});
+
+/* 预取大图，点开不空窗 */
+window.addEventListener("load", () => {
+  SCENES.forEach(s => { const im = new Image(); im.src = "img/" + s.key + ".jpg"; });
+});
+</script>
+</body>
+</html>
