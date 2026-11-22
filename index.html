@@ -75,6 +75,7 @@ body{
   position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(120% 100% at 50% 46%, rgba(6,10,12,0) 55%, rgba(6,10,12,.38) 100%);
 }
+/* 窄屏的标记样式统一放在标记定义之后（见 p3.html 末尾），避免被基础规则覆盖 */
 
 /* ---------- 弹窗：卷轴卡片 ---------- */
 .modal{
@@ -207,7 +208,10 @@ body{
 }
 @media (max-width:760px){
   .hint{display:none;}
-  .pin .tag{font-size:10px;padding:1px 4px 2px;}
+  /* 窄屏装不下十个标签，只留朱点；点本身放大并给足手指热区 */
+  .pin .tag{display:none;}
+  .pin button{gap:0;padding:9px;}
+  .pin .dot{width:13px;height:13px;}
 }
 @media (max-height:560px){
   .bar .sub{display:none;}
